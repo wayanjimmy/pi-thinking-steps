@@ -48,9 +48,9 @@
     "test": "npm run build && node --import tsx test/thinking-steps.test.ts && node --import tsx test/summarizer-challenger.test.ts"
   },
   "dependencies": {
-    "@mariozechner/pi-ai": "0.69.0",
-    "@mariozechner/pi-coding-agent": "0.69.0",
-    "@mariozechner/pi-tui": "0.69.0"
+    "@earendil-works/pi-ai": "0.80.10",
+    "@earendil-works/pi-coding-agent": "0.80.10",
+    "@earendil-works/pi-tui": "0.80.10"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",

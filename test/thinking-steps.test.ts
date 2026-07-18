@@ -29,7 +29,7 @@ import {
 } from "../state.js";
 import type { ThinkingThemeLike } from "../types.js";
 import thinkingStepsExtension from "../index.js";
-import { Key } from "@mariozechner/pi-tui";
+import { Key } from "@earendil-works/pi-tui";
 
 function stripAnsi(text: string): string {
 	return text.replace(/\x1b\[[0-9;]*m/g, "");
@@ -318,7 +318,7 @@ describe("patch guards", () => {
 	it("reports a specific compatibility error when an internal module cannot be imported", async () => {
 		await assert.rejects(
 			() => importPiCodingAgentInternal("dist/modes/interactive/missing.js"),
-			/could not import internal module "@mariozechner\/pi-coding-agent\/dist\/modes\/interactive\/missing\.js"/,
+			/could not import internal module "@earendil-works\/pi-coding-agent\/dist\/modes\/interactive\/missing\.js"/,
 		);
 	});
 });
@@ -2927,12 +2927,12 @@ describe("repo metadata contracts", () => {
 		assert.match(packageJson.scripts.test, /node --import tsx test\/summarizer-challenger\.test\.ts/);
 		assert.ok(packageJson.scripts.test.indexOf("test/thinking-steps.test.ts") < packageJson.scripts.test.indexOf("test/summarizer-challenger.test.ts"));
 		assert.equal(packageJson.license, "MIT");
-		assert.equal(packageJson.dependencies["@mariozechner/pi-ai"], "0.69.0");
-		assert.equal(packageJson.dependencies["@mariozechner/pi-coding-agent"], "0.69.0");
-		assert.equal(packageJson.dependencies["@mariozechner/pi-tui"], "0.69.0");
-		assert.equal(packageJson.devDependencies["@mariozechner/pi-ai"], undefined);
-		assert.equal(packageJson.devDependencies["@mariozechner/pi-coding-agent"], undefined);
-		assert.equal(packageJson.devDependencies["@mariozechner/pi-tui"], undefined);
+		assert.equal(packageJson.dependencies["@earendil-works/pi-ai"], "0.80.10");
+		assert.equal(packageJson.dependencies["@earendil-works/pi-coding-agent"], "0.80.10");
+		assert.equal(packageJson.dependencies["@earendil-works/pi-tui"], "0.80.10");
+		assert.equal(packageJson.devDependencies["@earendil-works/pi-ai"], undefined);
+		assert.equal(packageJson.devDependencies["@earendil-works/pi-coding-agent"], undefined);
+		assert.equal(packageJson.devDependencies["@earendil-works/pi-tui"], undefined);
 		assert.deepEqual(packageLock.packages?.[""]?.dependencies, packageJson.dependencies);
 		assert.ok(!Object.values(packageJson.dependencies).includes("latest"));
 		assert.ok(!Object.values(packageJson.devDependencies).includes("latest"));

@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import type { AssistantMessage, ThinkingContent } from "@mariozechner/pi-ai";
-import { Markdown, Spacer, Text } from "@mariozechner/pi-tui";
+import type { AssistantMessage, ThinkingContent } from "@earendil-works/pi-ai";
+import { Markdown, Spacer, Text } from "@earendil-works/pi-tui";
 import { decrementPatchRefCount, getPatchCleanup, getPatchInstallPromise, incrementPatchRefCount, resolveThinkingMessageScope, setPatchCleanup, setPatchInstallPromise } from "./state.js";
 import { ThinkingStepsComponent } from "./render.js";
 import type { ThinkingSourceBlock, ThinkingThemeLike } from "./types.js";
@@ -10,6 +10,8 @@ export const PI_CODING_AGENT_INTERNAL_MODULES = {
 	assistantMessageComponent: "dist/modes/interactive/components/assistant-message.js",
 	theme: "dist/modes/interactive/theme/theme.js",
 } as const;
+
+const PI_CODING_AGENT_PACKAGE = "@earendil-works/pi-coding-agent";
 
 interface AssistantMessageComponentPrototype {
 	updateContent(message: AssistantMessage): void;
@@ -23,6 +25,8 @@ interface AssistantMessageComponentPrototype {
 	hideThinkingBlock: boolean;
 	markdownTheme: unknown;
 	hiddenThinkingLabel: string;
+	outputPad?: number;
+	hasToolCalls?: boolean;
 }
 
 export function assertPatchableAssistantMessageComponent(value: unknown): { prototype: AssistantMessageComponentPrototype } {
@@ -105,7 +109,7 @@ function getPackageRoot(packageName: string): string {
 }
 
 export function resolvePiCodingAgentInternalModuleUrl(relativePath: string): string {
-	const packageRoot = getPackageRoot("@mariozechner/pi-coding-agent");
+	const packageRoot = getPackageRoot(PI_CODING_AGENT_PACKAGE);
 	return pathToFileURL(join(packageRoot, relativePath)).href;
 }
 
@@ -114,7 +118,7 @@ export async function importPiCodingAgentInternal<TModule>(relativePath: string)
 	try {
 		return (await import(moduleUrl)) as TModule;
 	} catch (error) {
-		throw new Error(`Thinking Steps patch failed: could not import internal module "@mariozechner/pi-coding-agent/${relativePath}". Pi internals may have moved.`, {
+		throw new Error(`Thinking Steps patch failed: could not import internal module "${PI_CODING_AGENT_PACKAGE}/${relativePath}". Pi internals may have moved.`, {
 			cause: error,
 		});
 	}
@@ -305,7 +309,7 @@ async function installPatch(): Promise<() => void> {
 
 			for (const content of message.content) {
 				if (content.type === "text" && content.text.trim()) {
-					this.contentContainer.addChild(new Markdown(content.text.trim(), 1, 0, this.markdownTheme as any));
+					this.contentContainer.addChild(new Markdown(content.text.trim(), this.outputPad ?? 1, 0, this.markdownTheme as any));
 					continue;
 				}
 
@@ -319,18 +323,22 @@ async function installPatch(): Promise<() => void> {
 			}
 
 			const hasToolCalls = message.content.some((content) => content.type === "toolCall");
-			if (!hasToolCalls) {
+			this.hasToolCalls = hasToolCalls;
+			if (message.stopReason === "length") {
+				this.contentContainer.addChild(new Spacer(1));
+				this.contentContainer.addChild(new Text(theme.fg("error", "Error: Model stopped because it reached the maximum output token limit. The response may be incomplete."), this.outputPad ?? 1, 0));
+			} else if (!hasToolCalls) {
 				if (message.stopReason === "aborted") {
 					const abortMessage =
 						message.errorMessage && message.errorMessage !== "Request was aborted"
 							? message.errorMessage
 							: "Operation aborted";
 					this.contentContainer.addChild(new Spacer(1));
-					this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), 1, 0));
+					this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), this.outputPad ?? 1, 0));
 				} else if (message.stopReason === "error") {
 					const errorMessage = message.errorMessage || "Unknown error";
 					this.contentContainer.addChild(new Spacer(1));
-					this.contentContainer.addChild(new Text(theme.fg("error", `Error: ${errorMessage}`), 1, 0));
+					this.contentContainer.addChild(new Text(theme.fg("error", `Error: ${errorMessage}`), this.outputPad ?? 1, 0));
 				}
 			}
 		} catch (error) {

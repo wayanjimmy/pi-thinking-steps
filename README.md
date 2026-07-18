@@ -183,7 +183,7 @@ That patch layer is:
 
 This extension intentionally depends on Pi's current internal TUI implementation.
 
-Today, the patch relies on these internal modules in `@mariozechner/pi-coding-agent`:
+Today, the patch relies on these internal modules in `@earendil-works/pi-coding-agent`:
 
 - `dist/modes/interactive/components/assistant-message.js`
 - `dist/modes/interactive/theme/theme.js`
@@ -200,7 +200,7 @@ That means:
 - assistant message ownership is recorded from lifecycle events so patched rendering can keep a message on its original scope even if another scope becomes current later
 - one registered extension instance still has a single active lifecycle scope for session-level events; Pi should not interleave new unowned sessions through one handler set without a new `session_start`/message ownership path
 
-The current package uses Pi package version `0.69.0` as runtime dependencies in `package.json`, and compatibility-sensitive upgrades must update `package-lock.json` in the same change.
+The current package uses Pi package version `0.80.10` as runtime dependencies in `package.json`, and compatibility-sensitive upgrades must update `package-lock.json` in the same change.
 
 ---
 
