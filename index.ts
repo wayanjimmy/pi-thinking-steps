@@ -1,6 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { AutocompleteItem } from "@earendil-works/pi-tui";
-import { Key } from "@earendil-works/pi-tui";
 import { retainThinkingStepsPatch } from "./internal-patch.js";
 import { clearThinkingStepsModePreference, readThinkingStepsModePreference, writeThinkingStepsModePreference } from "./persistence.js";
 import { parseThinkingMode } from "./parse.js";
@@ -100,12 +99,6 @@ function applyMode(
 	if (options?.announceScope) {
 		notifyUser(ctx, modeChangeMessage(mode, options.announceScope), "info");
 	}
-}
-
-function cycleMode(current: ThinkingStepsMode): ThinkingStepsMode {
-	if (current === "collapsed") return "summary";
-	if (current === "summary") return "expanded";
-	return "collapsed";
 }
 
 function parsePreferenceScope(input: string): PersistedThinkingStepsPreferenceScope | undefined {
@@ -267,18 +260,6 @@ export default function thinkingStepsExtension(pi: ExtensionAPI): void {
 			}
 
 			applyMode(pi, ctx, selectedMode, { announceScope: action.scope });
-		},
-	});
-
-	pi.registerShortcut(Key.alt("t"), {
-		description: "Cycle thinking view (collapsed, summary, expanded)",
-		handler: async (ctx) => {
-			if (isSessionDegraded(ctx.cwd)) {
-				notifyUser(ctx, degradedSessionMessage(), "warning");
-				return;
-			}
-			const nextMode = cycleMode(getThinkingStepsMode(ctx.cwd));
-			applyMode(pi, ctx, nextMode, { announceScope: "session" });
 		},
 	});
 
